@@ -1,6 +1,4 @@
----
-
-### **Gluc.IA: Guida all'Hackathon di 2 Giorni**
+# **Gluc.IA: Guida all'Hackathon di 2 Giorni**
 
 Questo documento è la vostra mappa per i prossimi due giorni. L'obiettivo non è creare un prodotto perfetto, ma un prototipo funzionante (MVP) che dimostri la potenza delle idee chiave, con un focus sul backend e sull'AI.
 
