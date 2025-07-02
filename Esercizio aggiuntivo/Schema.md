@@ -1,7 +1,8 @@
 # **FAME 2.0 – The Bio-Integrated Meal Engine**
 
-*Autore Originale: Mirko Calcaterra*
-*Estensione Proposta: Gemini AI Assistant*
+*Autore: Mirko Calcaterra*
+
+*Estensione Proposta di Fame, esercizio di lunedì*
 
 ---
 
