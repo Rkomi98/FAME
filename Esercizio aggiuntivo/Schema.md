@@ -1,8 +1,4 @@
-Certamente. Ecco una versione estesa e più "verosimile" del progetto FAME, che integra i dati biometrici provenienti da smartwatch per creare un'esperienza ancora più personalizzata. La struttura è pensata per essere un esercizio sfidante ma realizzabile in un hackathon di due giorni.
-
----
-
-### **FAME 2.0 – The Bio-Integrated Meal Engine**
+# **FAME 2.0 – The Bio-Integrated Meal Engine**
 
 *Autore Originale: Mirko Calcaterra*
 *Estensione Proposta: Gemini AI Assistant*
