@@ -16,7 +16,7 @@ Benvenuti all'hackathon di estensione di FAME. Partirete tutti da una base di co
 
 ### **Le Quattro Missioni di Sviluppo (Una per Studente)**
 
-Ogni studente sceglierà (o gli verrà assegnata) una Missione. Sarete valutati sulla base del successo della vostra Missione e di come si integra con quelle degli altri.
+Ogni studente sceglierà una Missione. Sarete valutati sulla base del successo della vostra Missione e di come si integra con quelle degli altri.
 
 #### **Missione 1: Il Ponte Biometrico (The Bio-Bridge)**
 
