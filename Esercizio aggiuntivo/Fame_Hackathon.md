@@ -1,10 +1,4 @@
-Certamente. Per trasformare FAME 2.0 in una vera e propria hackathon competitiva e valutata, è necessario definire un framework chiaro che includa criteri di valutazione oggettivi, deliverables precisi e un'agenda strutturata.
-
-Ecco una guida completa in formato Markdown che puoi presentare ai ragazzi.
-
----
-
-### **Hackathon FAME 2.0: Guida alla Competizione**
+# **Hackathon FAME 2.0: Guida alla Competizione**
 
 Benvenuti all'hackathon ufficiale di **FAME 2.0 – The Bio-Integrated Meal Engine**. Nelle prossime ore, non solo svilupperete un'applicazione, ma competerete per creare la soluzione più innovativa, funzionale e ben progettata.
 
