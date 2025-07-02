@@ -1,4 +1,4 @@
-# **FAME 2.0 – The Bio-Integrated Meal Engine**
+# **Hackathon di Estensione: FAME 2.0 – The Bio-Integrated Engine**
 
 *Autore: Mirko Calcaterra*
 
@@ -6,129 +6,93 @@
 
 ---
 
-## Introduzione
+Benvenuti all'hackathon di estensione di FAME. Partirete tutti da una base di codice funzionante: la versione originale di FAME, un'app che genera piani alimentari e liste della spesa. Il vostro compito, come team, è di evolverla in **FAME 2.0**, un assistente nutrizionale dinamico che si integra con la vita reale dell'utente.
 
-**FAME 2.0** è l'evoluzione del **F**ood **A**I **M**eal **E**ngine. Non è più solo una web-app che traduce le linee guida di un dietista, ma un vero e proprio **assistente nutrizionale dinamico** che si sincronizza con la tua vita.
+**Obiettivo principale:** Trasformare FAME da un generatore di piani statici a uno strumento che si **adatta quotidianamente** ai dati biometrici dell'utente.
 
-Il cuore del progetto è l'integrazione con i dati biometrici del tuo smartwatch (es. Apple Watch, Samsung/Galaxy Watch). FAME 2.0 non si limita a generare un piano statico, ma lo **adatta quotidianamente** in base a:
-1.  **Calorie bruciate** durante il giorno.
-2.  **Qualità del sonno** della notte precedente.
-3.  **Livelli di attività fisica** (passi, minuti di allenamento).
-
-Trasformiamo i dati del tuo corpo in un piano alimentare che evolve con te, con tanto di lista della spesa ottimizzata e video-ricette. L'architettura rimane un container **Python + FastAPI** e **React (TypeScript)**, ma con un'intelligenza potenziata.
+**Metodologia:** Lavorerete in "vibe coding" su un unico repository. Ogni studente sarà "owner" di una delle seguenti Missioni. Questo significa che guiderà lo sviluppo di quella feature, ma tutti dovranno collaborare e integrare il proprio lavoro per far funzionare il prodotto finale.
 
 ---
 
-## Funzionalità Principali
+### **Le Quattro Missioni di Sviluppo (Una per Studente)**
 
-| Modulo | Descrizione |
-| :--- | :--- |
-| **Autenticazione** | Login/Register con email + password, JWT stateless, recupero password. |
-| **Onboarding** | Questionario iniziale multi-step: preferenze alimentari, allergie, obiettivi, numero di persone in casa. **Nuovo**: richiesta di autorizzazione per collegare i dati sanitari. |
-| **Integrazione Biometrica** | **Collegamento via API a dati sanitari aggregati (es. Google Fit, che centralizza dati da molti wearable).** In alternativa, un **database mock** che simula dati giornalieri di: passi, calorie attive, ore di sonno, frequenza cardiaca a riposo. |
-| **Home → Calendario Dinamico** | Vista settimanale del piano alimentare. I pasti passati sono fissi, quelli futuri possono essere **ri-calcolati automaticamente** a fine giornata in base ai dati biometrici. Un'icona indicherà se il pasto è stato "adattato". |
-| **Generazione Piano Adattivo** | Chiamata a **Google Gemini** con un prompt arricchito: oltre a preferenze e allergie, include i **dati biometrici della giornata precedente** (es. "L'utente ieri ha bruciato 450kcal extra e dormito solo 5 ore. Adegua l'energia e i micronutrienti per il recupero"). L'algoritmo continua a privilegiare ingredienti di stagione. |
-| **Scheda Pasto** | Titolo, descrizione, ingredienti (grammatura scalata), istruzioni, **link YouTube** alla ricetta, valori nutrizionali dettagliati. |
-| **Lista della Spesa** | Aggregazione degli ingredienti per la settimana. **Nuovo**: possibilità di "congelare" il piano per generare una lista definitiva o di riceverne una "stimata" con possibili variazioni. |
-| **Impostazioni** | Gestione profilo, preferenze, membri della famiglia e **gestione delle connessioni API** (es. "Scollega Google Fit"). |
+Ogni studente sceglierà (o gli verrà assegnata) una Missione. Sarete valutati sulla base del successo della vostra Missione e di come si integra con quelle degli altri.
 
----
+#### **Missione 1: Il Ponte Biometrico (The Bio-Bridge)**
 
-## Obiettivi Didattici (Hackathon ~8 Ore / 2 Giorni)
+*   **Owner:** Studente A
+*   **Obiettivo:** Far entrare i dati del mondo reale nell'applicazione. Devi creare un sistema che fornisca dati biometrici giornalieri simulati per ogni utente.
 
-Gli studenti impareranno a:
-*   **Collaborare** in un ambiente "vibe coding" usando strumenti AI-assisted.
-*   Progettare un sistema che **risponde a input dinamici** del mondo reale (dati biometrici).
-*   **Integrare API di terze parti con autenticazione OAuth 2.0** (Google Fit) o, in alternativa, a creare e usare un **mock data provider** realistico.
-*   Scrivere **prompt per LLM significativamente più complessi e contestuali**.
-*   Gestire la logica di un'applicazione che si "auto-corregge" (i piani alimentari adattivi).
-*   Sviluppare un backend FastAPI robusto e un frontend React reattivo e mobile-first.
+*   **Task Concreti:**
+    1.  **Crea un Mock Data Provider:** Sviluppa un modulo Python (`biometric_provider.py`) che, dato un `user_id`, generi dati giornalieri realistici e **consistenti** (devono essere gli stessi se richiamati più volte per lo stesso utente e giorno). I dati da generare sono:
+        *   `active_calories_burned` (calorie attive bruciate)
+        *   `steps` (passi)
+        *   `sleep_hours` (ore di sonno della notte precedente)
+    2.  **Sviluppa l'Endpoint API:** Crea un nuovo endpoint protetto nel backend FastAPI, ad esempio `GET /users/me/biometrics`, che utilizzi il tuo provider per restituire i dati biometrici dell'utente autenticato per la giornata odierna in formato JSON.
+    3.  **Visualizza i Dati nel Frontend:** Modifica la dashboard/home page di React per chiamare questo nuovo endpoint e visualizzare i dati biometrici in una piccola card "Il tuo report di oggi".
+
+*   **Valutazione della Missione:**
+    *   **Successo:** I dati biometrici sono generati, esposti tramite API e visibili nel frontend.
+    *   **Eccellenza:** Il provider di dati mock è intelligente (es. i dati variano in modo plausibile giorno per giorno) e la visualizzazione nel frontend è chiara e immediata.
 
 ---
 
-## Prerequisiti
+#### **Missione 2: L'Architetto del Prompt Adattivo (The Adaptive Prompt-Architect)**
 
-*   **Account Replit/GitHub** e macchina locale (Node ≥20, Python ≥3.10).
-*   **Google Cloud Platform**:
-    *   *Generative AI API* (Gemini) → `GEMINI_API_KEY`
-    *   *YouTube Data API v3* → `YOUTUBE_API_KEY`
-    *   **(Nuovo/Consigliato)** *Google Fit API* → Abilita l'API e crea credenziali OAuth 2.0 (Client ID & Secret).
-*   Librerie Python: `fastapi`, `uvicorn`, `sqlalchemy`, `python-jose[cryptography]`, `google-generative-ai`, `google-api-python-client`, **(Nuovo)** `google-auth-oauthlib`.
+*   **Owner:** Studente B
+*   **Obiettivo:** Rendere l'IA "consapevole" dello stato fisico dell'utente. Devi modificare il cuore dell'app, ovvero la logica di generazione del piano alimentare, per includere i nuovi dati biometrici.
 
----
+*   **Task Concreti:**
+    1.  **Modifica la Logica di Generazione:** Intervieni sulla funzione `generate_mealplan()` nel backend. Prima di chiamare Gemini, questa funzione deve ora **chiamare l'endpoint della Missione 1** (`GET /users/me/biometrics`) per recuperare i dati del giorno.
+    2.  **Ingegnerizza il Nuovo Prompt:** Riscrivi il prompt inviato a Gemini. Non devi solo aggiungere i nuovi numeri, ma devi "istruire" l'IA su *come* usarli. Esempio di prompt migliorato:
+        > *"Sei un nutrizionista AI. Genera un piano per un utente con le seguenti preferenze: {{preferenze}}. Oggi l'utente ha uno stato fisico particolare: ha bruciato {{calorie}} kcal attive e ha dormito solo {{ore_sonno}} ore. Tieni conto di questo: aumenta l'apporto calorico per compensare l'attività fisica e suggerisci cibi che favoriscano il recupero e l'energia, data la scarsità di sonno. Restituisci il risultato in formato JSON..."*
+    3.  **Crea un Punto di Attivazione:** Aggiungi un pulsante nel frontend, ad esempio sulla dashboard, con l'etichetta "Adatta il piano di domani". La pressione di questo pulsante deve scatenare la nuova logica di generazione del piano.
 
-## Divisione Ruoli (Suggerita per 4 Persone)
-
-1.  **Frontend Developer (React & UI/UX)**: Si occupa della UI, del calendario (`React Big Calendar`), dello stepper di onboarding e della visualizzazione dei dati, inclusi quelli biometrici.
-2.  **Backend Developer (Core & Auth)**: Sviluppa le API per utenti, pasti, e soprattutto **gestisce il flusso OAuth 2.0 per l'integrazione con Google Fit** e la memorizzazione sicura dei token.
-3.  **AI & Data Specialist (Prompt & Logic)**: Progetta il **prompt adattivo** per Gemini. Crea la logica per recuperare i dati biometrici (reali o mock) e per fonderli con le preferenze dell'utente prima di chiamare l'LLM. Sviluppa l'algoritmo di stagionalità.
-4.  **Integration & QA Specialist (The Glue)**: Assicura che frontend e backend comunichino correttamente. Sviluppa il **mock data provider** per i dati biometrici, scrive test end-to-end e gestisce il deploy.
-
-> ★ Suggerimento: la definizione della **struttura dati biometrica** (sia essa reale da API o mock) è il primo task da fare tutti insieme.
+*   **Valutazione della Missione:**
+    *   **Successo:** Il piano alimentare generato cambia visibilmente quando i dati biometrici sono diversi.
+    *   **Eccellenza:** Il prompt è sofisticato e produce piani non solo quantitativamente diversi (più calorie), ma *qualitativamente* migliori (cibi per il recupero, ecc.), dimostrando una profonda comprensione del potenziale dell'LLM.
 
 ---
 
-### **Come integrare i dati dello Smartwatch: Opzione A (Realistica) e B (Hackathon-Friendly)**
+#### **Missione 3: L'Analista Nutrizionale (The Nutrition Analyst)**
 
-**A) API Reale (Google Fit):**
-Il Backend Developer implementa il flusso OAuth 2.0. Il frontend reindirizza l'utente a una pagina di consenso di Google. Una volta ottenuta l'autorizzazione, il backend riceve un token per interrogare l'API di Google Fit e recuperare dati come `aggregate_by_calories_expended`, `aggregate_by_step_count_delta`, ecc.
+*   **Owner:** Studente C
+*   **Obiettivo:** Dare all'utente un feedback immediato e utile sull'impatto nutrizionale di ciò che mangia, collegandolo agli obiettivi.
 
-**B) Mock Database (Hackathon-Friendly):**
-L'Integration Specialist crea un modulo Python, es. `biometric_provider.py`, che simula la risposta di un'API.
+*   **Task Concreti:**
+    1.  **Traccia i Consumi Giornalieri:** Modifica il backend per salvare non solo il piano, ma anche lo "stato" di un pasto (es. `mangiato` / `saltato`). Aggiorna i modelli di dati e crea un endpoint `POST /meals/{meal_id}/consume`.
+    2.  **Crea un Endpoint di Riepilogo:** Sviluppa un nuovo endpoint `GET /users/me/nutrition-summary` che calcoli e restituisca i totali nutrizionali (calorie, carboidrati, proteine, grassi) dei pasti consumati dall'utente nella giornata odierna.
+    3.  **Sviluppa una Dashboard di Progresso:** Nel frontend, crea una nuova vista o una sezione nella home page chiamata "Progresso Giornaliero". Questa sezione deve:
+        *   Chiamare l'endpoint di riepilogo.
+        *   Mostrare i totali nutrizionali rispetto agli obiettivi dell'utente (es. `1800/2200 kcal`).
+        *   Utilizzare barre di progresso o "anelli" per una visualizzazione chiara e immediata.
 
-```python
-# backend/biometric_provider.py
-import random
-from datetime import datetime, timedelta
-
-def get_biometric_data_for_user(user_id: int, date: datetime) -> dict:
-    """Simula i dati biometrici per un utente in una data specifica."""
-    # Logica per rendere i dati consistenti per lo stesso utente/giorno
-    random.seed(f"{user_id}-{date.strftime('%Y-%m-%d')}")
-    
-    return {
-        "date": date.strftime('%Y-%m-%d'),
-        "active_calories_burned": random.randint(250, 800),
-        "steps": random.randint(4000, 15000),
-        "sleep_hours": round(random.uniform(4.5, 8.5), 1),
-        "resting_heart_rate": random.randint(55, 75)
-    }
-```
-Il resto dell'app userà questa funzione come se stesse chiamando una vera API.
+*   **Valutazione della Missione:**
+    *   **Successo:** L'utente può segnare i pasti come consumati e vedere un riepilogo numerico dei suoi consumi giornalieri.
+    *   **Eccellenza:** La dashboard di progresso è visivamente accattivante, interattiva e offre all'utente un feedback potente e motivante sui suoi obiettivi.
 
 ---
 
-## Timeline Suggerita (Hackathon 2 Giorni / ~8 Ore)
+#### **Missione 4: Il Cronista della Settimana (The Weekly Chronicler)**
 
-### **Giorno 1 (4 Ore) – Le Basi di FAME**
+*   **Owner:** Studente D
+*   **Obiettivo:** Dare all'utente una visione storica dei suoi progressi, trasformando i dati giornalieri in insight settimanali.
 
-*   **(0:00 - 0:30) Kick-off & Setup:**
-    *   Setup repo, cartelle `backend/`, `frontend/`, file `.env`.
-    *   Definizione condivisa della struttura dati (inclusi i campi biometrici).
-*   **(0:30 - 2:00) Auth e UI Scheletro:**
-    *   **Backend**: Modelli Pydantic, auth con JWT, rotte protette.
-    *   **Frontend**: Pagine Login/Register, Onboarding (senza logica), vista Calendario vuota.
-*   **(2:00 - 4:00) Generazione Piano Base & Mock Provider:**
-    *   **AI/Data**: Implementa il prompt *base* (non ancora adattivo) e la funzione `generate_mealplan()`.
-    *   **Integration/QA**: Sviluppa e testa il `biometric_provider.py` (Opzione B).
-    *   **Team**: Integrate il tutto per generare un primo piano alimentare statico e visualizzarlo in calendario.
+*   **Task Concreti:**
+    1.  **Endpoint Dati Storici:** Crea un endpoint API `GET /users/me/weekly-report?date={{data}}` che aggreghi i dati delle **Missioni 1 e 3** su un arco di 7 giorni. L'endpoint deve restituire:
+        *   La media giornaliera di calorie bruciate, passi e ore di sonno.
+        *   La media giornaliera di calorie e macronutrienti consumati.
+    2.  **Componente Grafico:** Sviluppa un nuovo componente React che utilizzi una libreria di grafici (es. `Recharts` o `Chart.js`).
+    3.  **Pagina di Riepilogo Settimanale:** Crea una nuova pagina/rotta nel frontend chiamata "Report Settimanale". Questa pagina deve:
+        *   Permettere all'utente di navigare tra le settimane (settimana corrente, settimana precedente).
+        *   Chiamare l'endpoint dei dati storici.
+        *   Usare il tuo componente grafico per visualizzare l'andamento dei dati chiave (es. un grafico a barre che confronta calorie bruciate vs. calorie consumate per ogni giorno della settimana).
 
-### **Giorno 2 (4 Ore) – L'Integrazione Bio-Adattiva**
-
-*   **(4:00 - 6:00) Integrazione Dati Biometrici:**
-    *   **Backend**: Implementa il flusso OAuth 2.0 (Opzione A) o un endpoint che usi il mock provider (Opzione B).
-    *   **AI/Data**: Modifica il prompt per includere i dati biometrici. La funzione `generate_mealplan()` ora deve prima recuperare questi dati.
-    *   **Frontend**: Aggiungi il pulsante "Connetti a Google Fit" e visualizza i dati biometrici recuperati sulla dashboard.
-*   **(6:00 - 7:30) Logica Adattiva e Feature Finali:**
-    *   **Team**: Implementate la logica di ri-calcolo del piano. Ad esempio, un pulsante "Adatta il piano di domani" che rinfresca il piano usando i dati di oggi.
-    *   Completate la feature "Lista della Spesa".
-*   **(7:30 - 8:00) Testing Finale e Deploy:**
-    *   Testate il flusso completo end-to-end.
-    *   Configurate `render.yaml` o `.replit` e fate il deploy.
-    *   Preparatevi per la demo!
+*   **Valutazione della Missione:**
+    *   **Successo:** L'utente può visualizzare un riepilogo numerico dei dati della settimana passata.
+    *   **Eccellenza:** La visualizzazione grafica è chiara, interattiva e permette all'utente di identificare facilmente trend e pattern nel suo comportamento (es. "Vedo che nel weekend dormo di più ma consumo anche più calorie").
 
 ---
+### **Valutazione Finale**
 
-## Conclusioni
-
-Con FAME 2.0, non si costruisce solo un generatore di diete, ma un vero partner per il benessere che ascolta il corpo dell'utente. È un progetto che spinge a pensare a sistemi software complessi, dinamici e profondamente personalizzati, offrendo un'esperienza didattica di altissimo livello.
+La valutazione terrà conto del completamento delle singole missioni, della qualità del codice prodotto e, soprattutto, del **successo dell'integrazione finale**. Un'app in cui tutte e quattro le missioni comunicano tra loro in modo fluido e creano un'esperienza utente coerente riceverà il punteggio più alto.
