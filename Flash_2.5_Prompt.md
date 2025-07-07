@@ -1,24 +1,114 @@
-Genera un'applicazione web intelligente, **FAME (Food AI Meal Engine)**, progettata per trasformare le linee guida nutrizionali di un dietista in un sistema completo per la gestione dei pasti. L'app offre un piano alimentare settimanale personalizzato, che include colazione, pranzo, merenda e cena, tutti configurabili in base alle esigenze dell'utente. Genera inoltre una lista della spesa ottimizzata che considera le quantità necessarie, la stagionalità degli ingredienti e il numero di persone in casa. Per ogni pasto, fornisce schede pasto dettagliate che includono la ricetta, i valori nutrizionali e persino video-tutorial da YouTube.
+Genera un'applicazione web intelligente, **FAME** (Food AI Meal Engine), progettata per trasformare le linee guida nutrizionali di un dietista in un sistema completo per la gestione dei pasti. L'app offre un **piano alimentare settimanale** personalizzato, che include colazione, pranzo, merenda e cena, tutti configurabili in base alle esigenze dell'utente. Genera inoltre una **lista della spesa ottimizzata** che considera le quantità necessarie, la stagionalità degli ingredienti e il numero di persone in casa. Per ogni pasto, fornisce **schede pasto dettagliate** che includono la ricetta, i valori nutrizionali e persino video-tutorial da YouTube.
 
-**Stack Tecnologico**:
-* **Backend**: Python con FastAPI
-* **Frontend**: React (TypeScript), React Big Calendar, Tailwind, shadcn/ui
-* **LLM**: Google Gemini LLM
-* **Database**: SQLAlchemy
-* **API Esterne**: Google Gemini API, YouTube Data API v3, (Opz.) Spoonacular API
-* **Autenticazione**: JWT stateless con `python-jose[cryptography]`
-* **Deployment**: Render o Replit Deployments
+L'applicazione avrà un design **mobile-first** e sarà basata su un **Frontend React con TypeScript**, un **Backend FastAPI (Python)**, un'integrazione avanzata con **Google Gemini** per la generazione intelligente dei pasti, la **YouTube Data API** per i tutorial video e la **Spoonacular API** (opzionale) per dati nutrizionali aggiuntivi.
 
-La **User Interface (UI)** è pensata per un'esperienza fluida e intuitiva su dispositivi mobili. Durante i caricamenti dei dati o i cambi di schermata, l'app utilizza **placeholders visivi** accattivanti per migliorare la percezione della velocità e informare l'utente che i contenuti stanno arrivando. Ad esempio, potrebbe mostrare un'animazione di un panino che viene "montato", con i singoli componenti che compaiono in verticale e si assemblano progressivamente, simboleggiando la preparazione del pasto.
+La sua **User Interface (UI)** è pensata per un'esperienza fluida e intuitiva su dispositivi mobili. Durante i caricamenti dei dati o i cambi di schermata, l'app utilizzerà **placeholders visivi** accattivanti per migliorare la percezione della velocità e informare l'utente che i contenuti stanno arrivando. Ad esempio, potrebbe mostrare un'animazione di un panino che viene "montato", con i singoli componenti che compaiono in verticale e si assemblano progressivamente, simboleggiando la preparazione del pasto.
 
-Le funzionalità principali dell'app sono le seguenti:
+---
 
-* **Autenticazione**: Gestisce il **Login/Register** tramite email e password, utilizza un sistema **JWT stateless** per la sicurezza delle sessioni e permetti il **recupero della password**.
-* **Onboarding**: Al primo accesso, guida l'utente attraverso un **questionario multi-step** per raccogliere informazioni essenziali come sesso, età, peso, altezza, sport praticato, allergie/intoleranze, membri della famiglia e obiettivi nutrizionali (mettere massa o dimagrire). È anche possibile specificare quali pasti includere nel piano. Tutti questi dati sono liberamente **modificabili nella sezione "Impostazioni"**.
-* **Home → Calendario**: Presenta una **vista settimanale** del piano alimentare, con funzionalità **drag & drop** per organizzare i pasti. Un **Floating Action Button (FAB)** offre tre opzioni principali: "Carica dieta" (per importare diete tramite PDF o immagine con OCR), "Prenota consulto" (un link esterno a NutriDoc per consulenze) e "Genera piano" per creare un nuovo piano alimentare.
-* **Generazione piano**: Avviene tramite una **chiamata a Google Gemini con un prompt parametrico**, che restituisce un **JSON descrittivo** del piano. Questo JSON viene poi **salvato nel database** e **renderizzato sul calendario**. L'algoritmo intelligente filtra gli **ingredienti di stagione** (basandosi sul calendario UE) e assicura il rispetto di **allergie**, **obiettivi calorici** e **macronutrienti** specifici dell'utente.
-* **Scheda Pasto**: Ogni pasto generato ha una scheda dedicata che mostra il **titolo**, una **descrizione**, gli **ingredientsi con grammatura scalata** in base al numero di persone, le **istruzioni passo-passo** per la preparazione, un **link YouTube** alla ricetta e i **valori nutrizionali** dettagliati.
-* **Lista della Spesa**: Questa funzione **aggrega automaticamente tutti gli ingredienti** necessari per la settimana, **raggruppandoli per reparto del supermercato** per facilitare lo shopping. La lista può essere comodamente **scaricata in formato PDF o CSV**.
-* **Impostazioni**: In questa sezione, gli utenti possono **gestire il proprio profilo**, aggiornare le **preferenze alimentari**, specificare il **numero di persone in casa** e modificare i **target di peso/massa**.
+### **Stack Tecnologico**
 
-Il progetto è versatile e può essere distribuito sia su **Render** che su **Replit Deployments**.
+* **Backend**:
+    * FastAPI con **Python 3.13**
+    * **Uvicorn** per il server ASGI
+    * SQLAlchemy ORM per la gestione del database
+    * JWT stateless authentication (`python-jose[cryptography]`)
+    * Integrazione di Google Gemini con `google-generative-ai`
+    * YouTube Data API (`google-api-python-client`)
+    * Spoonacular API (opzionale)
+    * **Python-dotenv** per la gestione delle variabili ambientali
+* **Frontend**:
+    * React (TypeScript)
+    * Tailwind CSS
+    * React Big Calendar per la gestione del calendario
+    * shadcn/ui per componenti UI eleganti e funzionali
+
+---
+
+### **Cloud e Deployment**
+
+* **Google Cloud Platform**:
+    * **Generative AI API (Gemini)** con `GEMINI_API_KEY`
+    * **YouTube Data API v3** con `YOUTUBE_API_KEY`
+    * (Opz.) **Spoonacular API** con `SPOONACULAR_KEY`
+* **Deploy**:
+    * Render o Replit
+    * **Docker** (opzionale) per containerizzazione
+    * **Git** per version control
+    * **`render-cli`** per deployment
+
+---
+
+### **Struttura e Funzionalità**
+
+* **Autenticazione**:
+    * Login/Register via email + password
+    * JWT stateless authentication
+    * Recupero password via email
+
+* **Onboarding (Questionario Iniziale)**:
+    * Raccolta informazioni base: sesso, età, peso, altezza, sport praticato, **frequenza sport**.
+    * Dettagli su allergie/intolleranze, membri della famiglia, obiettivi specifici (massa/dimagrimento).
+    * Scelta dei pasti preferiti (modificabile successivamente nelle impostazioni).
+    * Definizione di diete particolari (es. vegetariano, vegano, ecc.).
+    * Indicazione dello **stato di gravidanza o allattamento (booleano)**.
+    * Definizione del **budget per la spesa (basso, medio, alto)**.
+
+* **Home → Calendario**:
+    * Presentazione di una vista calendario settimanale con funzionalità drag & drop per l'organizzazione dei pasti.
+    * Un Floating Action Button (FAB) con tre opzioni principali:
+        1.  **Caricamento dieta**: Importazione di diete da PDF o immagine tramite tecnologia OCR.
+        2.  **Prenotazione consulto**: Link esterno a NutriDoc per consulenze professionali.
+        3.  **Generazione automatica piano settimanale**.
+
+* **Generazione Piano**:
+    * Invio di un prompt parametrico a Google Gemini, includendo:
+        * Stagionalità degli ingredienti (basata sul calendario UE).
+        * Restrizioni dovute ad allergie/intoleranze.
+        * Obiettivi di calorie e macronutrienti target.
+    * **Post-processing efficace del JSON di risposta**, salvataggio nel database e **rendering fluido** sul frontend.
+
+* **Scheda Pasto**:
+    * Visualizzazione di titolo e descrizione **dettagliata** della ricetta.
+    * Elenco degli ingredienti con grammatura scalata in base al numero di persone.
+    * Istruzioni passo-passo per la preparazione.
+    * Valori nutrizionali dettagliati.
+    * Video YouTube embedded (tramite YouTube Data API).
+
+* **Lista della Spesa**:
+    * Aggregazione intelligente di tutti gli ingredienti necessari per la settimana.
+    * Raggruppamento automatico degli articoli per reparto del supermercato.
+    * Funzionalità di esportazione in formato PDF o CSV.
+
+* **Impostazioni**:
+    * Gestione del profilo utente (dati personali modificabili).
+    * Aggiornamento delle preferenze alimentari.
+    * Definizione del numero di persone in famiglia.
+    * Modifica degli obiettivi target per peso e massa.
+
+* **Reminder**:
+    * Notifiche push ogni due ore per ricordare all'utente di bere acqua.
+
+---
+
+### **Test e Quality Assurance**
+
+* Implementazione di **Test end-to-end (E2E)** con **Cypress o Playwright**.
+* Integrazione di **Unit e Integration test** per il backend con **pytest**.
+
+---
+
+### **Deliverables Finali**
+
+* Repository GitHub **ben strutturato**.
+* Documentazione chiara delle API con **Swagger (FastAPI built-in)**.
+* README **dettagliato** con istruzioni complete di installazione, setup e deploy.
+* Inclusione di **test automatici nella pipeline CI/CD (Render/Replit)**.
+
+---
+
+### **Note Aggiuntive**
+
+* Garantire massima usabilità e intuitività dell'interfaccia, specialmente per le interazioni da mobile.
+* **Sviluppare prompt LLM dettagliati e accurati per minimizzare la necessità di correzioni post-processing.**
+* **Assicurare una gestione precisa e sicura delle variabili di ambiente e delle API key.**
