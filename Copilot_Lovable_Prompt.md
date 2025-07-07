@@ -2,70 +2,110 @@
 
 ## Obiettivo
 
-Sviluppare l’interfaccia utente mobile‑first dell’applicazione **FAME – Food AI Meal Engine**, una web‑app che genera piani alimentari settimanali personalizzati a partire da linee guida dietetiche. L’app si integra con un backend **FastAPI** e sfrutta **Google Gemini** per la generazione dei menu. Il frontend deve essere implementato in **React + TypeScript**, con **TailwindCSS** per lo stile e componenti da **shadcn/ui**.
+Sviluppare l’interfaccia utente mobile‑first dell’applicazione **FAME – Food AI Meal Engine**, una web‑app che genera piani alimentari settimanali personalizzati a partire da linee guida dietetiche. Il backend è basato su **FastAPI** e si integra con **Google Gemini** per la generazione dei menu. L’app include promemoria idratativi e supporta vincoli di frequenza sportiva e budget alimentare impostati dall’utente durante l’onboarding.
 
 ---
 
-## Tecnologie Richieste
+## Stack Tecnologico
 
-- React (TypeScript)
-- TailwindCSS
-- shadcn/ui
-- React Router
-- React Big Calendar
-- JWT (token in `localStorage`)
-- fetch API per comunicare con il backend
-- Opzionale: React Query, mobile emulator per test
+### Frontend
+
+- **React** con **TypeScript**
+- **TailwindCSS** per lo styling
+- **shadcn/ui** per i componenti predefiniti
+- **React Big Calendar** per la visualizzazione del piano settimanale
+- **React Router** per la navigazione
+- **React Query** (opzionale)
+- **LocalStorage** per memorizzazione del JWT
+- **fetch API** per la comunicazione con il backend
+
+### Backend
+
+- **FastAPI** (Python ≥3.10)
+- **Uvicorn** come server ASGI
+- **SQLAlchemy** per gestione ORM
+- **Google Generative AI SDK** per interazione con Gemini
+- **Google API Python Client** per YouTube Data API
+- **python-jose[cryptography]** per JWT
+- **python-dotenv** per configurazioni ambiente
+- **OCR (facoltativo)** per estrazione testi da PDF/immagini
+- **Render** o **Replit Deployments** per pubblicazione live
 
 ---
 
 ## Pagine & Componenti da Implementare
 
 ### 1. `AuthPage.tsx` – Autenticazione
-- Form per login e registrazione con email + password
-- Toggle tra modalità Login / Signup
-- Validazione campi e gestione errori
+- Form login/registrazione con email + password
+- Toggle login/signup
+- Validazione form con messaggi di errore
 - Link “Password dimenticata”
-- Salvataggio token JWT in `localStorage`
-- Layout responsivo, stile wellness moderno
+- Salvataggio JWT in `localStorage`
 
-### 2. `OnboardingStepper.tsx` – Onboarding multi‑step
-- Raccolta dati utente tramite form guidato:
+---
+
+### 2. `OnboardingStepper.tsx` – Onboarding multi-step
+- Raccolta dati utente tramite form a step:
   - sesso, età, peso, altezza
-  - sport praticato
-  - allergie / intolleranze
-  - obiettivo nutrizionale: dimagrire o mettere massa
+  - sport praticato:
+    - tipo di sport
+    - **frequenza settimanale (es. 3 volte a settimana)**
+  - allergie / intolleranze alimentari
+  - obiettivo nutrizionale: dimagrire / mettere massa
   - pasti da includere: colazione, pranzo, merenda, cena
   - membri della famiglia
-- Barra di progresso
-- Stato persistente e chiamata API finale al backend
+  - **budget alimentare mensile indicativo** (usato per filtrare ingredienti e ricette)
+  - **promemoria acqua**: se abilitato, specificare ogni quante ore ricevere un alert
+- Stato gestito localmente con barra di avanzamento
+- Invio dati al backend al termine
+
+---
 
 ### 3. `CalendarView.tsx` – Calendario pasti
-- Vista settimanale drag&drop dei pasti
-- Uso di `React Big Calendar` customizzato con Tailwind
-- Floating Action Button (FAB) con 3 azioni:
-  1. Carica dieta (OCR da PDF / immagine – placeholder)
-  2. Prenota consulto esterno (link NutriDoc)
-  3. Genera piano (trigger backend)
+- Vista settimanale con drag&drop dei pasti generati
+- `React Big Calendar` customizzato
+- Floating Action Button (FAB):
+  1. Carica dieta (placeholder OCR PDF/immagine)
+  2. Prenota consulto (link NutriDoc)
+  3. Genera piano (chiamata backend → Gemini)
+
+---
 
 ### 4. `MealCard.tsx` – Scheda pasto
-- Titolo, descrizione sintetica
-- Ingredienti con grammatura (scalata in base al numero persone)
-- Istruzioni passo‑passo
-- Video tutorial YouTube
-- Valori nutrizionali: calorie, macronutrienti
+- Titolo e descrizione
+- Ingredienti con grammatura scalata
+- Istruzioni step-by-step
+- Link YouTube video ricetta
+- Valori nutrizionali: calorie, macro
+
+---
 
 ### 5. `ShoppingListPage.tsx` – Lista della spesa
-- Aggregazione ingredienti settimanali per pasti generati
-- Raggruppamento per reparto supermercato
-- Download lista in PDF o CSV
-- Visualizzazione mobile-friendly e stampabile
+- Aggregazione ingredienti per i pasti della settimana
+- Raggruppamento per reparto (ortofrutta, latticini…)
+- Download PDF/CSV
+- UI leggibile e stampabile
+
+---
 
 ### 6. `SettingsPage.tsx` – Impostazioni utente
-- Modifica profilo e preferenze
-- Obiettivo peso / massa
-- Numero membri in casa
-- Gestione pasti inclusi e allergie
+- Modifica dati personali e preferenze
+- Obiettivo nutrizionale e numero persone in casa
+- Allergie / pasti preferiti
+- **Gestione promemoria acqua**: attiva/disattiva, intervallo orario
+- **Aggiornamento frequenza sportiva e budget alimentare**
+
+---
+
+## Funzionalità Aggiuntive
+
+- Applicazione genera menu personalizzati in base a:
+  - obiettivo calorico e preferenze alimentari
+  - ingredienti di stagione
+  - vincoli di allergie, sport praticato e budget
+- Reminder automatici per bere acqua secondo intervallo impostato
+- Integrazione video YouTube nelle schede pasto
+- Lista della spesa ottimizzata per quantità e numero di persone
 
 ---
 
@@ -73,24 +113,15 @@ Sviluppare l’interfaccia utente mobile‑first dell’applicazione **FAME – 
 
 - `frontend/pages/`: pagine principali
 - `frontend/components/`: componenti riutilizzabili
-- `frontend/hooks/`: custom hooks condivisi
-- `frontend/utils/`: funzioni ausiliarie (es. fetch, formatter)
+- `frontend/hooks/`: custom hooks (fetch, reminder acqua, onboarding state)
+- `frontend/utils/`: utility varie (formatter, validazioni form)
 
 ---
 
-## Altre Specifiche
+## Specifiche
 
-- Tutte le chiamate API sono asincrone con gestione errori
-- Componenti modulari e tipizzati
-- Commenti esplicativi nel codice
+- Chiamate API asincrone con gestione errori
+- Componenti modulari e tipizzati con commenti esplicativi
+- Layout responsivo per smartphone, tablet e desktop
 - Navigazione gestita con `React Router`
-- Design accessibile, leggibile e coerente (colori pastello, spaziatura ampia)
-- Interfaccia testabile via emulatori mobile
-
----
-
-## Linea guida visiva
-
-- Stile moderno, light e coerente con il settore wellness
-- Uso ponderato dei componenti shadcn/ui per form, input, dialog, badge
-- Esperienza utente guidata, senza frizioni
+- Esperienza utente fluida, accessibile, coerente
