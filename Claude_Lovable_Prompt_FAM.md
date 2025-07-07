@@ -22,11 +22,12 @@ Crea **FAME** (Food AI Meal Engine), una web-app mobile-first per la generazione
 ### 2. Onboarding Multi-Step
 Al primo accesso, questionario con:
 - Dati personali: sesso, età, peso, altezza
-- Attività sportiva praticata
+- Attività sportiva praticata e frequenza settimanale
 - Allergie e intolleranze alimentari
 - Numero membri famiglia
 - Obiettivo: dimagrire/mettere massa/mantenimento
 - Pasti da includere: colazione, pranzo, merenda, cena
+- Frequenza promemoria idratazione (ogni 1-4 ore)
 
 ### 3. Dashboard Principale (Home)
 - Vista calendario settimanale con pasti generati
@@ -65,6 +66,15 @@ Per ogni pasto:
 - Numero persone in casa
 - Target peso/massa
 - Preferenze pasti (orari, tipologie)
+- Configurazione promemoria idratazione
+
+### 8. Sistema Promemoria Idratazione
+- Notifiche push personalizzabili
+- Pop-up in-app per ricordare di bere
+- Tracker consumo acqua giornaliero
+- Statistiche settimanali idratazione
+- Personalizzazione frequenza (1-4 ore)
+- Pausa notifiche durante sonno
 
 ## Design Requirements
 
@@ -83,6 +93,8 @@ Per ogni pasto:
 - **Bottom sheet**: per azioni rapide
 - **Loading states**: skeleton screens durante AI generation
 - **Toast notifications**: feedback azioni utente
+- **Hydration popup**: promemoria bere con animazioni
+- **Progress rings**: tracker acqua giornaliero
 
 ### Layout
 - **Header**: logo + hamburger menu
@@ -109,9 +121,10 @@ POST /shopping-list/export
 
 ### Database Models
 - User (id, email, password_hash, created_at)
-- Profile (user_id, age, weight, height, allergies, goals)
+- Profile (user_id, age, weight, height, allergies, goals, workout_frequency, hydration_frequency)
 - MealPlan (id, user_id, week_start, meals_json)
 - Meal (id, title, description, ingredients, instructions, youtube_link, nutrition)
+- HydrationLog (id, user_id, date, glasses_count, target_glasses)
 
 ## Funzionalità Avanzate
 
