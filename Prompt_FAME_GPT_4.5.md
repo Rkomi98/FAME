@@ -61,9 +61,12 @@ L'applicazione avrà un design mobile-first basato su:
 
 **Onboarding (questionario)**
 
-* Informazioni base: sesso, età, peso, altezza, sport praticato
+* Informazioni base: sesso, età, peso, altezza, sport praticato, frequenza sport
 * Allergie/intolleranze, membri famiglia, obiettivi (massa/dimagrimento)
 * Scelta pasti preferiti (modificabile in impostazioni)
+* Diete particolari (vegetariano, vegano, ecc.)
+* Stato di gravidanza o allattamento (booleano)
+* Budget per la spesa (basso, medio, alto)
 
 **Home → Calendario**
 
@@ -103,6 +106,10 @@ L'applicazione avrà un design mobile-first basato su:
 * Preferenze alimentari
 * Numero di persone in famiglia
 * Target obiettivi peso e massa
+
+**Reminder**
+
+* Notifica ogni due ore per ricordare all’utente di bere acqua
 
 ### Test e Quality Assurance
 
