@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="mt-5 text-center">
+    <h1>Benvenuto su Fame</h1>
+    <p class="lead">La tua guida personalizzata per una dieta sana e stagionale.</p>
+    <p>Accedi o registrati per iniziare a gestire il tuo piano alimentare.</p>
+    <a class="btn btn-primary me-2" href="{{ url_for('login') }}">Login</a>
+    <a class="btn btn-secondary" href="{{ url_for('register') }}">Register</a>
+  </div>
+{% endblock %}

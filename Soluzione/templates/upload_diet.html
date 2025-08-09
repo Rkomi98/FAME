@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+      <h2>Upload Diet</h2>
+      <form method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label for="diet_file" class="form-label">Seleziona il file della tua dieta (testo o PDF)</label>
+          <input type="file" class="form-control" id="diet_file" name="diet_file" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Carica</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}
