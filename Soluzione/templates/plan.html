@@ -1,18 +1,393 @@
 {% extends "base.html" %}
 {% block content %}
-  <div class="mt-4">
-    <h2>Piano settimanale</h2>
+  <div class="container mt-4">
     {% if plan %}
-      <p class="small text-muted">Settimana che inizia il {{ plan.start_date.strftime('%Y-%m-%d') }}</p>
-      <h5>Pasti:</h5>
-      <pre style="white-space: pre-wrap;">{{ plan.content }}</pre>
-      <h5>Lista della spesa:</h5>
-      <pre style="white-space: pre-wrap;">{{ plan.shopping_list }}</pre>
-      <form action="{{ url_for('generate_plan') }}" method="post" class="mt-3">
-        <button type="submit" class="btn btn-secondary">Rigenera piano per la prossima settimana</button>
-      </form>
+      <div class="row">
+        <div class="col-12">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h2><i class="fas fa-calendar-week me-2"></i>Piano Settimanale</h2>
+              <p class="text-muted">
+                <i class="fas fa-calendar me-1"></i>
+                Settimana dal {{ plan.start_date.strftime('%d/%m/%Y') }}
+                <span class="badge bg-success ms-2">
+                  <i class="fas fa-clock me-1"></i>Generato il {{ plan.created_at.strftime('%d/%m/%Y alle %H:%M') }}
+                </span>
+              </p>
+            </div>
+            <form action="{{ url_for('generate_plan') }}" method="post" class="d-inline">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-sync-alt me-2"></i>Rigenera Piano
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Piano Pasti - Calendario -->
+        <div class="col-lg-8 mb-4">
+          <div class="card">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Calendario Pasti</h5>
+            </div>
+            <div class="card-body">
+              {% if structured_plan %}
+              <div class="calendar-view">
+                {% set days_it = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'] %}
+                {% set days_en = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] %}
+                
+                <div class="row g-2">
+                  {% for i in range(7) %}
+                    {% set day_en = days_en[i] %}
+                    {% set day_it = days_it[i] %}
+                    {% if day_en in structured_plan %}
+                    <div class="col-lg-6 col-xl-4 mb-3">
+                      <div class="day-card">
+                        <div class="day-header">
+                          <h6 class="mb-1">{{ day_it }}</h6>
+                          <small class="text-muted">{{ (plan.start_date + i * timedelta(days=1)).strftime('%d/%m') if plan.start_date else '' }}</small>
+                        </div>
+                        
+                        {% if 'lunch' in structured_plan[day_en] %}
+                        <div class="meal-card lunch-card mb-2" onclick="showMealDetails('{{ day_en }}', 'lunch', '{{ structured_plan[day_en]['lunch']['title'] }}')">
+                          <div class="meal-icon">🥗</div>
+                          <div class="meal-info">
+                            <div class="meal-title">{{ structured_plan[day_en]['lunch']['title'] }}</div>
+                            <div class="meal-servings">{{ structured_plan[day_en]['lunch']['servings'] }} porzioni</div>
+                          </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if 'dinner' in structured_plan[day_en] %}
+                        <div class="meal-card dinner-card" onclick="showMealDetails('{{ day_en }}', 'dinner', '{{ structured_plan[day_en]['dinner']['title'] }}')">
+                          <div class="meal-icon">🍽️</div>
+                          <div class="meal-info">
+                            <div class="meal-title">{{ structured_plan[day_en]['dinner']['title'] }}</div>
+                            <div class="meal-servings">{{ structured_plan[day_en]['dinner']['servings'] }} porzioni</div>
+                          </div>
+                        </div>
+                        {% endif %}
+                      </div>
+                    </div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+              {% else %}
+              <div class="plan-content">
+                {{ plan.content | safe | nl2br }}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista della Spesa -->
+        <div class="col-lg-4 mb-4">
+          <div class="card">
+            <div class="card-header bg-success text-white">
+              <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Lista della Spesa</h5>
+            </div>
+            <div class="card-body">
+              <div class="shopping-list">
+                {{ plan.shopping_list | safe | nl2br }}
+              </div>
+              <div class="mt-3">
+                <button class="btn btn-outline-success btn-sm" onclick="printShoppingList()">
+                  <i class="fas fa-print me-1"></i>Stampa Lista
+                </button>
+                <button class="btn btn-outline-primary btn-sm" onclick="copyShoppingList()">
+                  <i class="fas fa-copy me-1"></i>Copia Testo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     {% else %}
-      <p>Non hai ancora generato un piano. Premi "Generate Plan" nel menu per crearne uno.</p>
+      <div class="text-center mt-5">
+        <div class="card mx-auto" style="max-width: 500px;">
+          <div class="card-body">
+            <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+            <h4>Nessun Piano Disponibile</h4>
+            <p class="text-muted">Non hai ancora generato un piano settimanale.</p>
+            <p class="mb-4">Assicurati di aver caricato la tua dieta e impostato le preferenze, poi genera il tuo primo piano!</p>
+            <div class="d-grid gap-2">
+              <a href="{{ url_for('upload_diet') }}" class="btn btn-outline-primary">
+                <i class="fas fa-upload me-2"></i>Carica Dieta
+              </a>
+              <a href="{{ url_for('preferences') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-cog me-2"></i>Imposta Preferenze
+              </a>
+              <form action="{{ url_for('generate_plan') }}" method="post" class="mt-2">
+                <button type="submit" class="btn btn-primary btn-lg w-100">
+                  <i class="fas fa-magic me-2"></i>Genera Piano
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     {% endif %}
   </div>
+
+  <!-- Modal per dettagli pasto -->
+  <div class="modal fade" id="mealModal" tabindex="-1" aria-labelledby="mealModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="mealModalLabel">Dettagli Pasto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="mealModalBody">
+          <div class="text-center">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Caricamento...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .calendar-view {
+      padding: 10px 0;
+    }
+    
+    .day-card {
+      border: 1px solid #e9ecef;
+      border-radius: 12px;
+      padding: 15px;
+      background: #f8f9fa;
+      height: 100%;
+      min-height: 200px;
+    }
+    
+    .day-header {
+      text-align: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #dee2e6;
+    }
+    
+    .day-header h6 {
+      font-weight: 600;
+      color: #495057;
+      margin: 0;
+    }
+    
+    .meal-card {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      border-left: 4px solid #007bff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .meal-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .lunch-card {
+      border-left-color: #28a745;
+    }
+    
+    .dinner-card {
+      border-left-color: #fd7e14;
+    }
+    
+    .meal-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .meal-icon {
+      font-size: 1.5em;
+      flex-shrink: 0;
+    }
+    
+    .meal-info {
+      flex: 1;
+    }
+    
+    .meal-title {
+      font-weight: 600;
+      color: #495057;
+      font-size: 0.9em;
+      line-height: 1.2;
+      margin-bottom: 2px;
+    }
+    
+    .meal-servings {
+      font-size: 0.8em;
+      color: #6c757d;
+    }
+    
+    .shopping-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    /* Miglioramento lista della spesa */
+    .shopping-category {
+      margin-bottom: 1.5rem;
+    }
+    
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 0.95em;
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      background: rgba(0,0,0,0.02);
+      border-radius: 6px;
+      border-left: 3px solid currentColor;
+    }
+    
+    .category-icon {
+      font-size: 1.2em;
+    }
+    
+    .category-items {
+      margin-left: 15px;
+    }
+    
+    .shopping-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+      font-size: 0.9em;
+    }
+    
+    .item-bullet {
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+    
+    .item-text {
+      color: #495057;
+    }
+    
+    .shopping-item:hover {
+      background: rgba(0,0,0,0.02);
+      border-radius: 4px;
+      padding-left: 8px;
+      transition: all 0.2s ease;
+    }
+  </style>
+
+  <script>
+    function printShoppingList() {
+      const content = document.querySelector('.shopping-list').innerHTML;
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html>
+          <head><title>Lista della Spesa</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h1 { color: #28a745; }
+          </style>
+          </head>
+          <body>
+            <h1>Lista della Spesa</h1>
+            ${content}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+    function copyShoppingList() {
+      const text = document.querySelector('.shopping-list').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Lista della spesa copiata negli appunti!');
+      });
+    }
+
+    // Funzione per mostrare i dettagli del pasto
+    async function showMealDetails(day, mealType, title) {
+      const modal = new bootstrap.Modal(document.getElementById('mealModal'));
+      const modalTitle = document.getElementById('mealModalLabel');
+      const modalBody = document.getElementById('mealModalBody');
+      
+      // Imposta il titolo del modal
+      const mealTypeIt = mealType === 'lunch' ? 'Pranzo' : 'Cena';
+      modalTitle.textContent = `${mealTypeIt}: ${title}`;
+      
+      // Mostra spinner di caricamento
+      modalBody.innerHTML = `
+        <div class="text-center">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Caricamento...</span>
+          </div>
+        </div>
+      `;
+      
+      // Mostra il modal
+      modal.show();
+      
+      try {
+        // Chiama l'API per ottenere i dettagli
+        const response = await fetch(`/api/meal_details/${day}/${mealType}`);
+        
+        if (response.ok) {
+          const mealData = await response.json();
+          
+          // Mostra i dettagli nel modal
+          modalBody.innerHTML = `
+            <div class="meal-details">
+              <div class="row">
+                <div class="col-md-6">
+                  <h6><i class="fas fa-utensils me-2"></i>Descrizione</h6>
+                  <p class="text-muted">${mealData.description || 'Descrizione non disponibile'}</p>
+                  
+                  <h6><i class="fas fa-bullseye me-2"></i>Focus Nutrizionale</h6>
+                  <p class="text-muted">${mealData.focus || 'Focus non specificato'}</p>
+                  
+                  <h6><i class="fas fa-users me-2"></i>Porzioni</h6>
+                  <p class="text-muted">${mealData.servings || 2} porzioni</p>
+                </div>
+                <div class="col-md-6">
+                  <h6><i class="fas fa-clipboard-list me-2"></i>Preparazione</h6>
+                  <div class="preparation-steps">
+                    ${mealData.preparation ? mealData.preparation.split('\\n').map(step => 
+                      `<div class="step mb-2">
+                        <span class="step-text">${step}</span>
+                      </div>`
+                    ).join('') : '<p class="text-muted">Istruzioni di preparazione non disponibili</p>'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          modalBody.innerHTML = `
+            <div class="alert alert-warning">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              Impossibile caricare i dettagli del pasto.
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Errore nel caricamento dettagli pasto:', error);
+        modalBody.innerHTML = `
+          <div class="alert alert-danger">
+            <i class="fas fa-times-circle me-2"></i>
+            Errore nel caricamento dei dati.
+          </div>
+        `;
+      }
+    }
+  </script>
 {% endblock %}

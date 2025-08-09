@@ -30,17 +30,24 @@ Le principali librerie utilizzate sono:
 
 L'app legge la configurazione da variabili d'ambiente. Puoi impostare queste variabili nel tuo shell oppure creare un file `.env` e caricarlo manualmente. I parametri principali sono:
 
+### API Keys per l'AI (almeno una richiesta)
+- `GEMINI_API_KEY` – **Preferita**: chiave API per Google Gemini. Ottieni la tua chiave da [Google AI Studio](https://makersuite.google.com/app/apikey)
+- `OPENAI_API_KEY` – **Fallback**: chiave API per OpenAI GPT. Ottieni la tua chiave da [OpenAI Platform](https://platform.openai.com/api-keys)
+
+### Altri parametri
 - `SECRET_KEY` – chiave segreta per la sessione Flask (obbligatoria in produzione).
 - `DATABASE_URL` – URI del database. Di default viene creato un file `app.db` nella cartella dell'app.
-- `GEMINI_API_KEY` – la chiave API per il modello Google Gemini. Se non la imposti, verrà restituito un piano di esempio.
 - `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USE_TLS`, `MAIL_USERNAME`, `MAIL_PASSWORD` – parametri per inviare le email tramite SMTP. Se `MAIL_SERVER` non è impostato, le email saranno stampate a console.
-- `PORT` – porta su cui avviare l'applicazione (default 5000).
+- `PORT` – porta su cui avviare l'applicazione (default 5000).
+
+**Nota**: L'app prova automaticamente diversi modelli Gemini (gemini-1.5-flash, gemini-1.5-pro, ecc.) e in caso di fallimento usa OpenAI come backup. Se nessuna API key è configurata, viene utilizzato un piano dimostrativo.
 
 Ad esempio, su Linux/macOS puoi esportare le variabili prima di avviare l'app:
 
 ```bash
 export SECRET_KEY="metti-qui-una-chiave-sicura"
 export GEMINI_API_KEY="la-tua-chiave-API-Gemini"
+export OPENAI_API_KEY="la-tua-chiave-OpenAI"  # opzionale, come fallback
 export MAIL_SERVER="smtp.gmail.com"
 export MAIL_PORT="587"
 export MAIL_USE_TLS="true"
@@ -86,9 +93,23 @@ Per pubblicare l'applicazione online, puoi utilizzare un servizio di hosting di 
 
 Assicurati che la porta utilizzata dall'app corrisponda a quella richiesta dal servizio di hosting (di solito Heroku usa la variabile d'ambiente `PORT`).
 
-## Note sul modello Gemini
+## Note sui modelli AI
 
-L'integrazione con Google Gemini è stata realizzata prevedendo l'endpoint `v1beta/models/gemini-pro:generateContent`. Nel codice troverai la funzione `call_gemini_api` in `utils.py`, che costruisce la richiesta e recupera la risposta. Se la variabile `GEMINI_API_KEY` non è impostata, la funzione restituisce un piano dimostrativo. Per utilizzare davvero il modello dovrai ottenere una chiave API valida da Google e impostarla come variabile d'ambiente.
+L'applicazione supporta due provider AI:
+
+### Google Gemini (Preferito)
+L'app prova automaticamente questi modelli Gemini in ordine di preferenza:
+- `gemini-1.5-flash` (più veloce)
+- `gemini-1.5-pro` (più potente)
+- `gemini-1.5-pro-002` e `gemini-1.5-pro-001` (versioni alternative)
+
+### OpenAI (Fallback)
+Se tutti i modelli Gemini falliscono, l'app usa automaticamente `gpt-3.5-turbo` di OpenAI.
+
+### Fallback locale
+Se nessuna API key è configurata, viene utilizzato un piano dimostrativo con dati di esempio.
+
+Il codice include logging dettagliato per debuggare le chiamate API e vedere quale modello viene utilizzato con successo.
 
 ## Struttura del progetto
 

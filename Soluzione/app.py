@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import os
 from datetime import date, timedelta
-from io import TextIOWrapper
+from io import TextIOWrapper, BytesIO
 
 from flask import (
     Flask,
@@ -32,10 +32,155 @@ from flask_login import (
     current_user,
 )
 from werkzeug.security import generate_password_hash, check_password_hash
+from pypdf import PdfReader
 
 from config import Config
 from models import db, User, Diet, Plan, Preference
 from utils import generate_weekly_plan, send_email
+import json
+
+
+def extract_text_from_file(file) -> str:
+    """Extract text from uploaded file (supports PDF and text files).
+    
+    Args:
+        file: Flask FileStorage object
+        
+    Returns:
+        Extracted text content as string
+    """
+    filename = file.filename.lower() if file.filename else ""
+    
+    if filename.endswith('.pdf'):
+        # Handle PDF files
+        try:
+            file_bytes = file.read()
+            pdf_file = BytesIO(file_bytes)
+            reader = PdfReader(pdf_file)
+            
+            text_content = []
+            for page in reader.pages:
+                text_content.append(page.extract_text())
+            
+            return "\n".join(text_content)
+        except Exception as e:
+            # Fallback: try to read as text if PDF parsing fails
+            file.seek(0)  # Reset file pointer
+            return file.read().decode(errors="ignore")
+    else:
+        # Handle text files
+        return file.read().decode(errors="ignore")
+
+
+def parse_plan_content(content: str) -> dict:
+    """Parse plan content to extract structured meal data."""
+    try:
+        # Try to extract JSON from the original generation if available
+        # This is a simplified parser - in a real app you'd want more robust parsing
+        structured_plan = {}
+        
+        days_map = {
+            "LUNEDÌ": "monday",
+            "MARTEDÌ": "tuesday", 
+            "MERCOLEDÌ": "wednesday",
+            "GIOVEDÌ": "thursday",
+            "VENERDÌ": "friday",
+            "SABATO": "saturday",
+            "DOMENICA": "sunday"
+        }
+        
+        lines = content.split('\n')
+        current_day = None
+        current_meal = None
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+                
+            # Check if it's a day header
+            for day_it, day_en in days_map.items():
+                if day_it in line.upper():
+                    current_day = day_en
+                    structured_plan[current_day] = {}
+                    break
+            
+            # Check if it's a meal
+            if current_day and ('**Pranzo:**' in line or '🥗 **Pranzo:**' in line):
+                title = line.split('**Pranzo:**')[1].strip() if '**Pranzo:**' in line else line.split('🥗 **Pranzo:**')[1].strip()
+                structured_plan[current_day]['lunch'] = {'title': title, 'description': '', 'focus': '', 'servings': 2}
+                current_meal = 'lunch'
+            elif current_day and ('**Cena:**' in line or '🍽️ **Cena:**' in line):
+                title = line.split('**Cena:**')[1].strip() if '**Cena:**' in line else line.split('🍽️ **Cena:**')[1].strip()
+                structured_plan[current_day]['dinner'] = {'title': title, 'description': '', 'focus': '', 'servings': 3}
+                current_meal = 'dinner'
+            elif current_day and current_meal and line.startswith('📝'):
+                structured_plan[current_day][current_meal]['description'] = line.replace('📝', '').strip()
+            elif current_day and current_meal and line.startswith('🎯'):
+                focus_info = line.replace('🎯', '').strip()
+                if '•' in focus_info:
+                    parts = focus_info.split('•')
+                    structured_plan[current_day][current_meal]['focus'] = parts[0].strip()
+                    if len(parts) > 1:
+                        servings_text = parts[1].strip()
+                        if 'porzioni' in servings_text:
+                            try:
+                                servings = int(servings_text.split()[0])
+                                structured_plan[current_day][current_meal]['servings'] = servings
+                            except:
+                                pass
+                else:
+                    structured_plan[current_day][current_meal]['focus'] = focus_info
+        
+        return structured_plan
+    except Exception as e:
+        print(f"Error parsing plan content: {e}")
+        return {}
+
+
+def generate_preparation_instructions(title: str, description: str) -> str:
+    """Generate basic preparation instructions for a meal."""
+    # This is a simple implementation - in a real app you might use AI or a database
+    instructions = []
+    
+    if "salmone" in title.lower():
+        instructions.extend([
+            "1. Preriscalda il forno a 180°C",
+            "2. Condisci il salmone con olio, sale e limone", 
+            "3. Cuoci per 15-20 minuti",
+            "4. Prepara le verdure di contorno"
+        ])
+    elif "pasta" in title.lower():
+        instructions.extend([
+            "1. Porta a ebollizione abbondante acqua salata",
+            "2. Cuoci la pasta secondo i tempi di cottura",
+            "3. Prepara il condimento in padella",
+            "4. Manteca la pasta con il condimento"
+        ])
+    elif "pollo" in title.lower():
+        instructions.extend([
+            "1. Taglia il pollo a pezzi regolari",
+            "2. Marinalo con erbe e spezie per 30 minuti",
+            "3. Cuoci in padella o al forno",
+            "4. Controlla la cottura interna"
+        ])
+    elif "insalata" in title.lower():
+        instructions.extend([
+            "1. Lava e asciuga bene le verdure",
+            "2. Taglia gli ingredienti a pezzi uniformi",
+            "3. Prepara il condimento a parte",
+            "4. Condisci solo prima di servire"
+        ])
+    else:
+        # Generic instructions
+        instructions.extend([
+            "1. Prepara tutti gli ingredienti necessari",
+            "2. Segui la ricetta tradizionale per questo piatto",
+            "3. Cuoci rispettando i tempi indicati",
+            "4. Servi caldo e gustoso"
+        ])
+    
+    return "\n".join(instructions)
 
 
 def create_app() -> Flask:
@@ -43,6 +188,14 @@ def create_app() -> Flask:
     app = Flask(__name__)
     app.config.from_object(Config)
     db.init_app(app)
+    
+    # Add custom template filter for newlines to br tags
+    @app.template_filter('nl2br')
+    def nl2br(text):
+        """Convert newlines to HTML br tags."""
+        if not text:
+            return text
+        return text.replace('\n', '<br>\n')
 
     # Setup Flask-Login
     login_manager = LoginManager(app)
@@ -53,7 +206,7 @@ def create_app() -> Flask:
         return User.query.get(int(user_id))
 
     # Create database tables at startup if they don't exist
-    @app.before_first_request
+    @app.before_request
     def create_tables() -> None:
         db.create_all()
 
@@ -140,13 +293,19 @@ def create_app() -> Flask:
             if not file or file.filename == "":
                 flash("No file selected.")
             else:
-                # Read file content as text. Assume UTF-8 encoding.
-                text = file.read().decode(errors="ignore")
-                diet = Diet(user_id=current_user.id, content=text)
-                db.session.add(diet)
-                db.session.commit()
-                flash("Diet uploaded successfully.")
-                return redirect(url_for("view_diet"))
+                try:
+                    # Extract text from file (supports PDF and text files)
+                    text = extract_text_from_file(file)
+                    if not text.strip():
+                        flash("The uploaded file appears to be empty or could not be read.")
+                    else:
+                        diet = Diet(user_id=current_user.id, content=text)
+                        db.session.add(diet)
+                        db.session.commit()
+                        flash(f"Diet uploaded successfully from {file.filename}!")
+                        return redirect(url_for("view_diet"))
+                except Exception as e:
+                    flash(f"Error processing file: {str(e)}")
         return render_template("upload_diet.html")
 
     # View diet
@@ -239,7 +398,40 @@ def create_app() -> Flask:
             .order_by(Plan.created_at.desc())
             .first()
         )
-        return render_template("plan.html", plan=plan)
+        
+        # Parse plan content to extract structured data
+        structured_plan = None
+        if plan and plan.content:
+            structured_plan = parse_plan_content(plan.content)
+        
+        return render_template("plan.html", plan=plan, structured_plan=structured_plan, timedelta=timedelta)
+    
+    # API endpoint for meal details
+    @app.route("/api/meal_details/<day>/<meal_type>")
+    @login_required
+    def get_meal_details(day: str, meal_type: str) -> dict:
+        plan = (
+            Plan.query.filter_by(user_id=current_user.id)
+            .order_by(Plan.created_at.desc())
+            .first()
+        )
+        
+        if not plan:
+            return {"error": "No plan found"}, 404
+            
+        structured_plan = parse_plan_content(plan.content)
+        if not structured_plan or day not in structured_plan:
+            return {"error": "Day not found"}, 404
+            
+        if meal_type not in structured_plan[day]:
+            return {"error": "Meal not found"}, 404
+            
+        meal = structured_plan[day][meal_type]
+        
+        # Add preparation instructions (dummy for now, could be enhanced)
+        meal["preparation"] = generate_preparation_instructions(meal.get("title", ""), meal.get("description", ""))
+        
+        return meal
 
     return app
 

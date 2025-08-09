@@ -1,0 +1,12 @@
+# Ignore local Python virtual environment
+FAME/
+
+# Ignore environment files and database
+.env
+app.db
+*.sh
+
+# Ignore downloaded static files (Bootstrap)
+static/
+
+

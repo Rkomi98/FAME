@@ -1,15 +1,41 @@
 {% extends "base.html" %}
 {% block content %}
   <div class="row justify-content-center mt-5">
-    <div class="col-md-6">
-      <h2>Upload Diet</h2>
-      <form method="post" enctype="multipart/form-data">
-        <div class="mb-3">
-          <label for="diet_file" class="form-label">Seleziona il file della tua dieta (testo o PDF)</label>
-          <input type="file" class="form-control" id="diet_file" name="diet_file" required>
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-upload me-2"></i>Carica la tua dieta</h3>
         </div>
-        <button type="submit" class="btn btn-primary">Carica</button>
-      </form>
+        <div class="card-body">
+          <p class="text-muted mb-4">
+            Carica il piano alimentare fornito dal tuo nutrizionista. 
+            Supportiamo file di testo (.txt) e documenti PDF (.pdf).
+          </p>
+          <form method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label for="diet_file" class="form-label">
+                <i class="fas fa-file me-2"></i>Seleziona il file della tua dieta
+              </label>
+              <input 
+                type="file" 
+                class="form-control" 
+                id="diet_file" 
+                name="diet_file" 
+                accept=".txt,.pdf,text/plain,application/pdf"
+                required
+              >
+              <div class="form-text">
+                Formati supportati: file di testo (.txt) e PDF (.pdf)
+              </div>
+            </div>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-cloud-upload-alt me-2"></i>Carica dieta
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 {% endblock %}
