@@ -27,6 +27,8 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(200), nullable=False)
     # Region used to tailor seasonal produce suggestions (e.g. "Campania, Italy").
     region = db.Column(db.String(100), nullable=True)
+    # JSON string storing favorite email addresses for shopping list delivery
+    favorite_emails = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships: a user may have many preferences, diets and plans.
@@ -34,6 +36,26 @@ class User(UserMixin, db.Model):
     diets = db.relationship("Diet", backref="user", lazy=True)
     plans = db.relationship("Plan", backref="user", lazy=True)
 
+    def get_favorite_emails(self) -> list[str]:
+        """Get the list of favorite email addresses."""
+        if not self.favorite_emails:
+            return []
+        try:
+            import json
+            return json.loads(self.favorite_emails)
+        except (json.JSONDecodeError, TypeError):
+            return []
+    
+    def add_favorite_email(self, email: str) -> None:
+        """Add an email to the favorites list if not already present."""
+        import json
+        emails = self.get_favorite_emails()
+        if email not in emails:
+            emails.append(email)
+            # Keep only the last 10 emails
+            emails = emails[-10:]
+            self.favorite_emails = json.dumps(emails)
+    
     def __repr__(self) -> str:
         return f"<User {self.username}>"
 

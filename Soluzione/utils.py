@@ -420,29 +420,25 @@ def format_shopping_list(shopping_list: Dict[str, List[str]]) -> str:
         if category in categories_map and items:
             cat_info = categories_map[category]
             
-            # Crea la sezione HTML
-            section_html = f"""
-            <div class="shopping-category mb-4">
+            # Crea la sezione HTML senza spazi extra
+            section_html = f"""<div class="shopping-category mb-4">
                 <h6 class="category-header" style="color: {cat_info['color']};">
                     <span class="category-icon">{cat_info['icon']}</span>
                     {cat_info['name']}
                     <span class="badge bg-light text-dark ms-2">{len(items)}</span>
                 </h6>
-                <div class="category-items">
-            """
+                <div class="category-items">"""
             
             for item in items:
                 section_html += f"""
                     <div class="shopping-item">
                         <span class="item-bullet" style="color: {cat_info['color']};">•</span>
                         <span class="item-text">{item}</span>
-                    </div>
-                """
+                    </div>"""
             
             section_html += """
                 </div>
-            </div>
-            """
+            </div>"""
             
             formatted_sections.append(section_html)
     

@@ -15,6 +15,7 @@ import os
 from datetime import date, timedelta
 from io import TextIOWrapper, BytesIO
 
+from dotenv import load_dotenv
 from flask import (
     Flask,
     render_template,
@@ -23,6 +24,7 @@ from flask import (
     flash,
     request,
     send_from_directory,
+    jsonify,
 )
 from flask_login import (
     LoginManager,
@@ -38,6 +40,8 @@ from config import Config
 from models import db, User, Diet, Plan, Preference
 from utils import generate_weekly_plan, send_email
 import json
+
+load_dotenv()
 
 
 def extract_text_from_file(file) -> str:
@@ -380,13 +384,13 @@ def create_app() -> Flask:
         )
         db.session.add(plan)
         db.session.commit()
-        # Send shopping list via email
+        # Send shopping list via email to user's own email
         send_email(
             current_user.email,
             subject=f"Your Shopping List for week starting {start_date.isoformat()}",
             body=f"Hello {current_user.username},\n\nHere is your meal plan:\n\n{plan_text}\n\nShopping List:\n{shopping_list}\n\nEnjoy your meals!",
         )
-        flash("Weekly plan generated and shopping list sent!")
+        flash("Weekly plan generated and shopping list sent to your email!")
         return redirect(url_for("view_plan"))
 
     # View plan
@@ -432,6 +436,46 @@ def create_app() -> Flask:
         meal["preparation"] = generate_preparation_instructions(meal.get("title", ""), meal.get("description", ""))
         
         return meal
+
+    # Send shopping list to custom email
+    @app.route("/send_shopping_list", methods=["POST"])
+    @login_required
+    def send_shopping_list() -> str:
+        email_address = request.form.get("email_address", "").strip()
+        if not email_address:
+            flash("Please provide an email address.", "error")
+            return redirect(url_for("view_plan"))
+        
+        # Get the latest plan
+        plan = (
+            Plan.query.filter_by(user_id=current_user.id)
+            .order_by(Plan.created_at.desc())
+            .first()
+        )
+        
+        if not plan:
+            flash("No plan available to send.", "error")
+            return redirect(url_for("view_plan"))
+        
+        # Add email to favorites
+        current_user.add_favorite_email(email_address)
+        db.session.commit()
+        
+        # Send email
+        send_email(
+            email_address,
+            subject=f"Shopping List from {current_user.username} - Week starting {plan.start_date.isoformat()}",
+            body=f"Hello,\n\n{current_user.username} has shared their shopping list with you:\n\n{plan.shopping_list}\n\nEnjoy your meals!",
+        )
+        
+        flash(f"Shopping list sent to {email_address}!", "success")
+        return redirect(url_for("view_plan"))
+
+    # API endpoint to get favorite emails
+    @app.route("/api/favorite_emails")
+    @login_required
+    def get_favorite_emails():
+        return jsonify({"emails": current_user.get_favorite_emails()})
 
     return app
 
