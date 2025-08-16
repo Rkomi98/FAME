@@ -166,7 +166,7 @@
                         <div class="card-body text-center p-5">
                             <h4 class="card-title mb-4">🚀 Demo Live</h4>
                             <p class="card-text mb-4">Prova tutte le funzionalità di FAME con dati di esempio.</p>
-                            <a href="#" id="demo-link" class="btn btn-primary btn-lg">
+                            <a href="https://fame-jre3.onrender.com" target="_blank" class="btn btn-primary btn-lg">
                                 <i class="fas fa-external-link-alt me-2"></i>Apri Demo
                             </a>
                             <p class="text-muted mt-3 small">
@@ -264,11 +264,7 @@ pip install -r requirements.txt</code></pre>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="config.js"></script>
     <script>
-        // Set demo link based on configuration
-        document.getElementById('demo-link').href = BACKEND_URL || '#';
-        
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
