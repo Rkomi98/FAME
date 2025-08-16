@@ -195,7 +195,7 @@ def create_app() -> Flask:
     db.init_app(app)
     
     # Enable CORS for frontend deployment
-    CORS(app, origins=["https://yourusername.github.io", "http://localhost:3000", "http://localhost:5000"])
+    CORS(app, origins=["https://rkomi98.github.io", "http://localhost:3000", "http://localhost:5000", "https://fame-jre3.onrender.com"])
     
     # Add custom template filter for newlines to br tags
     @app.template_filter('nl2br')
