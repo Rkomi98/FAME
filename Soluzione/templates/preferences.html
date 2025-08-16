@@ -8,8 +8,66 @@
           <label for="disliked" class="form-label">Cibi da evitare (separati da virgola)</label>
           <input type="text" class="form-control" id="disliked" name="disliked" value="{{ preference.disliked if preference else '' }}">
         </div>
+
+        <div class="mb-3 form-check">
+          <input type="checkbox" class="form-check-input" id="trains" name="trains" {% if user.trains %}checked{% endif %}>
+          <label class="form-check-label" for="trains">Ti alleni?</label>
+        </div>
+
+        <div id="training-details" class="mb-3 {% if not user.trains %}d-none{% endif %}">
+          <div class="mb-3">
+            <label for="training_frequency" class="form-label">Quante volte a settimana?</label>
+            <input type="number" class="form-control" id="training_frequency" name="training_frequency" value="{{ user.training_frequency if user.training_frequency is not none else '' }}" min="1" max="7">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">In quali giorni?</label>
+            <div>
+              {% set training_days = user.training_days.split(',') if user.training_days else [] %}
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="monday" name="training_days" value="Monday" {% if 'Monday' in training_days %}checked{% endif %}>
+                <label class="form-check-label" for="monday">Lunedì</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="tuesday" name="training_days" value="Tuesday" {% if 'Tuesday' in training_days %}checked{% endif %}>
+                <label class="form-check-label" for="tuesday">Martedì</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="wednesday" name="training_days" value="Wednesday" {% if 'Wednesday' in training_days %}checked{% endif %}>
+                <label class="form-check-label" for="wednesday">Mercoledì</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="thursday" name="training_days" value="Thursday" {% if 'Thursday' in training_days %}checked{% endif %}>
+                <label class="form-check-label" for="thursday">Giovedì</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="friday" name="training_days" value="Friday" {% if 'Friday' in training_days %}checked{% endif %}>
+                <label class="form-check-label" for="friday">Venerdì</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="saturday" name="training_days" value="Saturday" {% if 'Saturday' in training_days %}checked{% endif %}>
+                <label class="form-check-label" for="saturday">Sabato</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="sunday" name="training_days" value="Sunday" {% if 'Sunday' in training_days %}checked{% endif %}>
+                <label class="form-check-label" for="sunday">Domenica</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <button type="submit" class="btn btn-primary">Salva</button>
       </form>
     </div>
   </div>
+
+<script>
+  document.getElementById('trains').addEventListener('change', function() {
+    var trainingDetails = document.getElementById('training-details');
+    if (this.checked) {
+      trainingDetails.classList.remove('d-none');
+    } else {
+      trainingDetails.classList.add('d-none');
+    }
+  });
+</script>
 {% endblock %}

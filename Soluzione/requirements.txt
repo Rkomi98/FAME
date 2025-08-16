@@ -1,6 +1,9 @@
 flask
 flask_sqlalchemy
 flask_login
+flask_cors
 requests
 pypdf
 openai
+python-dotenv
+gunicorn

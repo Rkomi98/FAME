@@ -8,5 +8,6 @@ app.db
 
 # Ignore downloaded static files (Bootstrap)
 static/
+node_modules/
 
 

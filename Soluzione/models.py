@@ -29,6 +29,12 @@ class User(UserMixin, db.Model):
     region = db.Column(db.String(100), nullable=True)
     # JSON string storing favorite email addresses for shopping list delivery
     favorite_emails = db.Column(db.Text, nullable=True)
+    trains = db.Column(db.Boolean, default=False)
+    training_frequency = db.Column(db.Integer, nullable=True)
+    training_days = db.Column(db.String(100), nullable=True) # e.g., "Monday,Wednesday,Friday"
+    # API configuration for personal AI service usage
+    api_provider = db.Column(db.String(50), default='gemini') # 'gemini', 'openai', 'claude'
+    api_key = db.Column(db.String(500), nullable=True) # Encrypted API key
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships: a user may have many preferences, diets and plans.
@@ -94,6 +100,8 @@ class Plan(db.Model):
     start_date = db.Column(db.Date, nullable=False)
     # Textual representation of the meals for the week.
     content = db.Column(db.Text, nullable=False)
+    # JSON representation of the meals for the week.
+    json_content = db.Column(db.Text, nullable=True)
     # Shopping list text generated for the week.
     shopping_list = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

@@ -1,134 +1,233 @@
-# Fame – Diet Monitoring Web Application
+# FAME - Food and Meal Enhancement 🍽️
 
-Fame è un'applicazione web che ti consente di caricare la dieta fornita dal tuo nutrizionista, personalizzarla con le tue preferenze alimentari e generare un piano settimanale di pasti completo di lista della spesa. L'applicazione è pensata per essere responsive, quindi utilizzabile comodamente sia da desktop che da dispositivi mobili.
+![Python](https://img.shields.io/badge/python-v3.10+-blue.svg)
+![Flask](https://img.shields.io/badge/flask-v3.0+-green.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![AI Powered](https://img.shields.io/badge/AI-Powered-orange.svg)
 
-## Funzionalità principali
+**FAME** è un'applicazione web intelligente che trasforma la tua dieta del nutrizionista in piani settimanali personalizzati, completi di ricette stagionali e liste della spesa. Con supporto per allenamenti, preferenze alimentari e integrazione con i migliori modelli AI del mercato.
 
-- **Registrazione e accesso**: ogni utente può creare un account personale indicando anche la propria regione (utile per suggerimenti legati ai prodotti tipici).
-- **Upload dieta**: puoi caricare un file (testo o PDF) con la tua dieta. Il contenuto viene salvato nel database e utilizzato come base per generare i piani settimanali.
-- **Preferenze**: puoi indicare cibi non graditi o allergie; queste informazioni saranno usate per evitare di proporti determinati alimenti nei piani.
-- **Generazione piano settimanale**: premendo il pulsante “Generate Plan” viene creato un piano di pranzo e cena per ogni giorno della settimana successiva. Se è configurata una chiave API per Google Gemini, l'app interroga il modello per generare i pasti e la lista della spesa. In assenza di chiave, viene utilizzato un piano dimostrativo.
-- **Lista della spesa via email**: al termine della generazione, la lista della spesa e il piano settimanale vengono inviati via email all'indirizzo registrato. Se non hai configurato un server di posta, il contenuto della mail sarà stampato a console.
-- **Visualizzazione diete e piani**: nella dashboard puoi consultare l'ultima dieta caricata e l'ultimo piano generato.
+## ✨ Nuove Funzionalità
 
-## Requisiti
+### 🔑 API Key Personali
+- **Ogni utente usa la propria chiave API** - nessun costo condiviso!
+- Supporto per **Google Gemini**, **OpenAI** e **Anthropic Claude**
+- Configurazione durante la registrazione
 
-Assicurati di avere installato Python 3.10 o superiore. Per installare le dipendenze richieste, esegui:
+### 🏋️ Integrazione Allenamenti
+- Specifica se ti alleni, frequenza e giorni della settimana
+- **Piani adattati automaticamente**: carboidrati prima dell'allenamento, proteine dopo
+- Calcolo nutrizionale ottimizzato per sportivi
 
+### 🌱 Stagionalità Garantita
+- **Solo frutta e verdura di stagione** per la tua regione
+- Ricette autentiche basate su fonti web verificate
+- Rispetto della tradizione culinaria locale
+
+### 🗑️ Gestione Dinamica dei Pasti
+- **Elimina singoli pasti** dal piano settimanale
+- Aggiornamento automatico della visualizzazione
+- Flessibilità totale nella pianificazione
+
+## 🚀 Demo Live
+
+- **Frontend**: [https://tuonome.github.io/FAME](https://tuonome.github.io/FAME) *(GitHub Pages)*
+- **Backend**: [https://fame-backend.onrender.com](https://fame-backend.onrender.com) *(Render.com)*
+
+## 📋 Requisiti di Sistema
+
+- **Python**: 3.10 o superiore
+- **Chiave API**: Almeno una tra Gemini, OpenAI o Claude
+- **Browser**: Moderno con supporto ES6+
+
+## 🛠️ Installazione Rapida
+
+### 1. Clona il Repository
+```bash
+git clone https://github.com/tuonome/FAME.git
+cd FAME/Soluzione
+```
+
+### 2. Crea Ambiente Virtuale
+```bash
+python -m venv FAME
+source FAME/bin/activate  # Linux/macOS
+# FAME\Scripts\activate   # Windows
+```
+
+### 3. Installa Dipendenze
 ```bash
 pip install -r requirements.txt
 ```
 
-Le principali librerie utilizzate sono:
-
-- **Flask** – per il framework web;
-- **Flask-SQLAlchemy** – per l'ORM e la gestione del database SQLite;
-- **Flask-Login** – per l'autenticazione degli utenti;
-- **Requests** – per l'eventuale chiamata all'API di Google Gemini.
-
-## Configurazione
-
-L'app legge la configurazione da variabili d'ambiente. Puoi impostare queste variabili nel tuo shell oppure creare un file `.env` e caricarlo manualmente. I parametri principali sono:
-
-### API Keys per l'AI (almeno una richiesta)
-- `GEMINI_API_KEY` – **Preferita**: chiave API per Google Gemini. Ottieni la tua chiave da [Google AI Studio](https://makersuite.google.com/app/apikey)
-- `OPENAI_API_KEY` – **Fallback**: chiave API per OpenAI GPT. Ottieni la tua chiave da [OpenAI Platform](https://platform.openai.com/api-keys)
-
-### Altri parametri
-- `SECRET_KEY` – chiave segreta per la sessione Flask (obbligatoria in produzione).
-- `DATABASE_URL` – URI del database. Di default viene creato un file `app.db` nella cartella dell'app.
-- `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USE_TLS`, `MAIL_USERNAME`, `MAIL_PASSWORD` – parametri per inviare le email tramite SMTP. Se `MAIL_SERVER` non è impostato, le email saranno stampate a console.
-- `PORT` – porta su cui avviare l'applicazione (default 5000).
-
-**Nota**: L'app prova automaticamente diversi modelli Gemini (gemini-1.5-flash, gemini-1.5-pro, ecc.) e in caso di fallimento usa OpenAI come backup. Se nessuna API key è configurata, viene utilizzato un piano dimostrativo.
-
-Ad esempio, su Linux/macOS puoi esportare le variabili prima di avviare l'app:
-
+### 4. Configura Ambiente (Opzionale)
+Crea un file `.env` per lo sviluppo locale:
 ```bash
-export SECRET_KEY="metti-qui-una-chiave-sicura"
-export GEMINI_API_KEY="la-tua-chiave-API-Gemini"
-export OPENAI_API_KEY="la-tua-chiave-OpenAI"  # opzionale, come fallback
-export MAIL_SERVER="smtp.gmail.com"
-export MAIL_PORT="587"
-export MAIL_USE_TLS="true"
-export MAIL_USERNAME="tua-email@gmail.com"
-export MAIL_PASSWORD="la-tua-password"
+SECRET_KEY=your-secret-key-here
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USE_TLS=true
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-app-password
 ```
 
-## Avvio in locale
-
-Per avviare l'applicazione in locale, posizionati nella cartella `fame_app` ed esegui:
-
+### 5. Avvia l'Applicazione
 ```bash
 python app.py
 ```
 
-L'app sarà raggiungibile all'indirizzo `http://localhost:5000`. Aprila in un browser e prova a registrarti, caricare la tua dieta e generare un piano. Poiché l'interfaccia è responsive, la potrai usare comodamente anche da smartphone.
+Visita: `http://localhost:5000`
 
-## Esecuzione dei test
+## 🔐 Configurazione API Key
 
-È stato incluso un set minimo di test automatici basati su `pytest` per verificare le funzionalità principali. Per eseguirli:
+Durante la registrazione, scegli il tuo provider AI preferito:
 
-```bash
-pip install pytest
-pytest -q
-```
+### Google Gemini (Consigliato)
+- **Costo**: Gratuito fino a 15 richieste/minuto
+- **Ottieni la chiave**: [Google AI Studio](https://aistudio.google.com/app/apikey)
+- **Modelli supportati**: Gemini 1.5 Flash, Gemini 1.5 Pro
 
-I test utilizzano un database SQLite in memoria e non influiscono sui dati reali.
+### OpenAI
+- **Costo**: Pay-per-use (~$0.002 per piano)
+- **Ottieni la chiave**: [OpenAI Platform](https://platform.openai.com/api-keys)
+- **Modelli supportati**: GPT-3.5 Turbo, GPT-4
 
-## Pubblicazione online
+### Anthropic Claude
+- **Costo**: Pay-per-use (~$0.003 per piano)
+- **Ottieni la chiave**: [Anthropic Console](https://console.anthropic.com/)
+- **Modelli supportati**: Claude 3 Sonnet
 
-Per pubblicare l'applicazione online, puoi utilizzare un servizio di hosting di applicazioni Python, ad esempio [Render](https://render.com/), [Heroku](https://www.heroku.com/) o [Fly.io](https://fly.io/). In linea generale dovrai:
+## 🌐 Deploy in Produzione
 
-1. Inizializzare un repository Git nella directory `fame_app` e caricare il codice su GitHub o altro provider.
-2. Creare un file `Procfile` (per Heroku) o configurare il `Dockerfile` per altri servizi. Per Heroku, il `Procfile` potrebbe contenere:
-   
-   ```Procfile
-   web: gunicorn app:flask_app
+### Frontend (GitHub Pages)
+
+1. **Fork il repository** su GitHub
+2. **Abilita GitHub Pages** nelle impostazioni del repo
+3. **Configura il branch** `gh-pages` come sorgente
+4. **Personalizza** il file `config.js` con l'URL del tuo backend
+
+### Backend (Render.com - Gratuito)
+
+1. **Connetti il repository** su [Render.com](https://render.com)
+2. **Crea un Web Service** con queste impostazioni:
+   ```
+   Build Command: pip install -r requirements.txt
+   Start Command: python app.py
+   ```
+3. **Aggiungi le variabili d'ambiente**:
+   ```
+   SECRET_KEY=your-production-secret-key
+   MAIL_SERVER=smtp.gmail.com
+   MAIL_PORT=587
+   MAIL_USE_TLS=true
+   MAIL_USERNAME=your-email@gmail.com
+   MAIL_PASSWORD=your-app-password
    ```
 
-   dove `flask_app` è la variabile creata in fondo a `app.py` quando l'app è eseguita come modulo.
-3. Impostare le variabili d'ambiente nel pannello di configurazione del servizio (SECRET_KEY, GEMINI_API_KEY, dati SMTP ecc.).
-4. Effettuare il deploy. Il servizio installerà automaticamente i pacchetti indicati in `requirements.txt` e avvierà l'app.
+### Alternative Backend
+- **Heroku**: Con Procfile incluso
+- **Railway**: Deploy automatico da Git
+- **Fly.io**: Con Dockerfile
+- **DigitalOcean App Platform**: Deploy one-click
 
-Assicurati che la porta utilizzata dall'app corrisponda a quella richiesta dal servizio di hosting (di solito Heroku usa la variabile d'ambiente `PORT`).
+## 📱 Utilizzo
 
-## Note sui modelli AI
+### 1. Registrazione
+- Crea account con username, email e password
+- **Seleziona il provider AI** (Gemini/OpenAI/Claude)
+- **Inserisci la tua chiave API personale**
+- Specifica la tua regione per ingredienti stagionali
 
-L'applicazione supporta due provider AI:
+### 2. Configurazione Profilo
+- **Preferenze alimentari**: Allergie e cibi da evitare
+- **Allenamento**: Frequenza, giorni della settimana
+- **Regione**: Per ingredienti locali e stagionali
 
-### Google Gemini (Preferito)
-L'app prova automaticamente questi modelli Gemini in ordine di preferenza:
-- `gemini-1.5-flash` (più veloce)
-- `gemini-1.5-pro` (più potente)
-- `gemini-1.5-pro-002` e `gemini-1.5-pro-001` (versioni alternative)
+### 3. Carica la Dieta
+- **Upload PDF o testo** della dieta del nutrizionista
+- Supporto per file multipagina e formati misti
 
-### OpenAI (Fallback)
-Se tutti i modelli Gemini falliscono, l'app usa automaticamente `gpt-3.5-turbo` di OpenAI.
+### 4. Genera Piano Settimanale
+- **Un click** per generare pranzo e cena per 7 giorni
+- **Lista spesa automatica** categorizzata e quantificata
+- **Invio email** con piano completo
 
-### Fallback locale
-Se nessuna API key è configurata, viene utilizzato un piano dimostrativo con dati di esempio.
+### 5. Gestisci i Pasti
+- **Visualizza dettagli** di ogni pasto (ingredienti, preparazione)
+- **Elimina pasti singoli** se non graditi
+- **Rigenera piano** quando necessario
 
-Il codice include logging dettagliato per debuggare le chiamate API e vedere quale modello viene utilizzato con successo.
+## 🏗️ Architettura Tecnica
 
-## Struttura del progetto
-
+### Backend (Flask)
 ```
-fame_app/
-├── app.py            # entry point Flask
-├── config.py         # configurazione dell'app
-├── models.py         # definizione dei modelli SQLAlchemy
-├── utils.py          # funzioni di utilità (API Gemini, email, piano settimanale)
-├── requirements.txt  # dipendenze Python
-├── templates/        # file HTML basati su Jinja2
-├── tests/            # test automatici
-└── README.md         # questo file
+app.py              # Main Flask application
+├── models.py       # SQLAlchemy database models
+├── utils.py        # AI integration & utilities
+├── config.py       # Configuration management
+└── templates/      # Jinja2 HTML templates
 ```
 
-## File statici e Bootstrap
+### Database Schema
+```sql
+User:
+- id, username, email, password
+- region, api_provider, api_key
+- trains, training_frequency, training_days
+- favorite_emails, created_at
 
-La grafica fa uso di Bootstrap 5 caricato tramite CDN, quindi non è necessario scaricare altre librerie CSS o JS. Se vuoi personalizzare ulteriormente l'interfaccia, puoi aggiungere file CSS/JS nella cartella `static/` e includerli in `base.html`.
+Plan:
+- id, user_id, start_date
+- content, json_content, shopping_list
+- created_at
+```
 
-## Conclusioni
+### API Integration
+- **Multi-provider support**: Gemini, OpenAI, Claude
+- **Automatic fallback**: Se un provider fallisce
+- **Rate limiting**: Gestione automatica dei limiti
+- **Error handling**: Graceful degradation
 
-Questa applicazione fornisce un punto di partenza robusto per gestire un piano alimentare personalizzato. Puoi ampliarla integrando ulteriori funzionalità come il supporto alle notifiche push, l'esportazione del piano in PDF o la sincronizzazione con calendari esterni. Buon divertimento!
+## 🧪 Test
+
+```bash
+# Installa pytest
+pip install pytest
+
+# Esegui tutti i test
+pytest tests/ -v
+
+# Test con coverage
+pytest --cov=. tests/
+```
+
+## 🤝 Contribuire
+
+1. **Fork** il progetto
+2. **Crea un branch** per la feature (`git checkout -b feature/AmazingFeature`)
+3. **Commit** le modifiche (`git commit -m 'Add AmazingFeature'`)
+4. **Push** al branch (`git push origin feature/AmazingFeature`)
+5. **Apri una Pull Request**
+
+## 📄 Licenza
+
+Questo progetto è distribuito sotto licenza MIT. Vedi `LICENSE` per dettagli.
+
+## 🆘 Supporto
+
+- **Issues**: [GitHub Issues](https://github.com/tuonome/FAME/issues)
+- **Documentazione**: [Wiki del progetto](https://github.com/tuonome/FAME/wiki)
+- **Email**: support@fame-app.com
+
+## 🎯 Roadmap
+
+- [ ] **Mobile App** (React Native)
+- [ ] **Export PDF** dei piani settimanali  
+- [ ] **Integrazione calendario** (Google Calendar, Outlook)
+- [ ] **Analisi nutrizionale** avanzata
+- [ ] **Community recipes** e condivisione
+- [ ] **API pubblica** per sviluppatori
+
+---
+
+**Sviluppato con ❤️ per semplificare la tua alimentazione quotidiana**

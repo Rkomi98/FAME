@@ -26,6 +26,7 @@ from flask import (
     send_from_directory,
     jsonify,
 )
+from flask_cors import CORS
 from flask_login import (
     LoginManager,
     login_user,
@@ -38,7 +39,7 @@ from pypdf import PdfReader
 
 from config import Config
 from models import db, User, Diet, Plan, Preference
-from utils import generate_weekly_plan, send_email
+from utils import generate_weekly_plan, send_email, format_weekly_plan
 import json
 
 load_dotenv()
@@ -193,6 +194,9 @@ def create_app() -> Flask:
     app.config.from_object(Config)
     db.init_app(app)
     
+    # Enable CORS for frontend deployment
+    CORS(app, origins=["https://yourusername.github.io", "http://localhost:3000", "http://localhost:5000"])
+    
     # Add custom template filter for newlines to br tags
     @app.template_filter('nl2br')
     def nl2br(text):
@@ -246,8 +250,11 @@ def create_app() -> Flask:
             email = request.form.get("email", "").strip()
             password = request.form.get("password", "")
             region = request.form.get("region", "").strip()
-            if not username or not email or not password:
-                flash("Please fill out all required fields.")
+            api_provider = request.form.get("api_provider", "gemini").strip()
+            api_key = request.form.get("api_key", "").strip()
+            
+            if not username or not email or not password or not api_key:
+                flash("Please fill out all required fields including API key.")
             elif User.query.filter_by(username=username).first():
                 flash("Username already exists.")
             elif User.query.filter_by(email=email).first():
@@ -259,6 +266,8 @@ def create_app() -> Flask:
                     email=email,
                     password=hashed,
                     region=region or None,
+                    api_provider=api_provider,
+                    api_key=api_key,  # In production, this should be encrypted
                 )
                 db.session.add(new_user)
                 db.session.commit()
@@ -335,9 +344,19 @@ def create_app() -> Flask:
             else:
                 pref = Preference(user_id=current_user.id, disliked=disliked)
                 db.session.add(pref)
+
+            current_user.trains = 'trains' in request.form
+            if current_user.trains:
+                current_user.training_frequency = request.form.get('training_frequency')
+                training_days = request.form.getlist('training_days')
+                current_user.training_days = ','.join(training_days)
+            else:
+                current_user.training_frequency = None
+                current_user.training_days = None
+            
             db.session.commit()
             flash("Preferences updated.")
-        return render_template("preferences.html", preference=pref)
+        return render_template("preferences.html", preference=pref, user=current_user)
 
     # Generate plan
     @app.route("/generate_plan", methods=["POST"])
@@ -372,14 +391,23 @@ def create_app() -> Flask:
         if pref_record and pref_record.disliked:
             preferences_list = [p.strip() for p in pref_record.disliked.split(",") if p.strip()]
         # Generate plan via util
-        plan_text, shopping_list = generate_weekly_plan(
-            diet.content, preferences_list, current_user.region, start_date
+        plan_text, shopping_list, raw_json = generate_weekly_plan(
+            diet.content,
+            preferences_list,
+            current_user.region,
+            start_date,
+            current_user.trains,
+            current_user.training_frequency,
+            current_user.training_days,
+            current_user.api_provider,
+            current_user.api_key,
         )
         # Save plan
         plan = Plan(
             user_id=current_user.id,
             start_date=start_date,
             content=plan_text,
+            json_content=raw_json,
             shopping_list=shopping_list,
         )
         db.session.add(plan)
@@ -405,7 +433,12 @@ def create_app() -> Flask:
         
         # Parse plan content to extract structured data
         structured_plan = None
-        if plan and plan.content:
+        if plan and plan.json_content:
+            try:
+                structured_plan = json.loads(plan.json_content).get("weekly_plan")
+            except json.JSONDecodeError:
+                structured_plan = parse_plan_content(plan.content)
+        elif plan and plan.content:
             structured_plan = parse_plan_content(plan.content)
         
         return render_template("plan.html", plan=plan, structured_plan=structured_plan, timedelta=timedelta)
@@ -423,7 +456,16 @@ def create_app() -> Flask:
         if not plan:
             return {"error": "No plan found"}, 404
             
-        structured_plan = parse_plan_content(plan.content)
+        structured_plan = {}
+        if plan.json_content:
+            try:
+                structured_plan = json.loads(plan.json_content).get("weekly_plan", {})
+            except json.JSONDecodeError:
+                pass # Fallback to parsing content below
+
+        if not structured_plan:
+             structured_plan = parse_plan_content(plan.content)
+
         if not structured_plan or day not in structured_plan:
             return {"error": "Day not found"}, 404
             
@@ -436,6 +478,44 @@ def create_app() -> Flask:
         meal["preparation"] = generate_preparation_instructions(meal.get("title", ""), meal.get("description", ""))
         
         return meal
+
+    @app.route("/api/delete_meal/<int:plan_id>/<day>/<meal_type>", methods=["DELETE"])
+    @login_required
+    def delete_meal(plan_id, day, meal_type):
+        plan = Plan.query.filter_by(id=plan_id, user_id=current_user.id).first()
+        if not plan:
+            return jsonify({"error": "Plan not found"}), 404
+
+        if not plan.json_content:
+            return jsonify({"error": "Cannot modify a plan without structured data"}), 400
+
+        try:
+            plan_data = json.loads(plan.json_content)
+            weekly_plan = plan_data.get("weekly_plan", {})
+
+            if day in weekly_plan and meal_type in weekly_plan[day]:
+                del weekly_plan[day][meal_type]
+                if not weekly_plan[day]: # remove day if empty
+                    del weekly_plan[day]
+
+                plan_data["weekly_plan"] = weekly_plan
+                
+                # Update json_content and regenerate text content
+                plan.json_content = json.dumps(plan_data, ensure_ascii=False, indent=2)
+                plan.content = format_weekly_plan(weekly_plan)
+                
+                # We will tackle shopping list regeneration later.
+                # For now, let's just add a note.
+                if "Nota:" not in plan.shopping_list:
+                    plan.shopping_list += "\\n\\n---\\n**Nota:** Il piano è stato modificato. La lista della spesa potrebbe non essere più accurata."
+
+                db.session.commit()
+                return jsonify({"success": True}), 200
+            else:
+                return jsonify({"error": "Meal not found in plan"}), 404
+        except json.JSONDecodeError:
+            return jsonify({"error": "Invalid plan content format"}), 500
+
 
     # Send shopping list to custom email
     @app.route("/send_shopping_list", methods=["POST"])
