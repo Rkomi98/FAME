@@ -565,4 +565,9 @@ if __name__ == "__main__":
     flask_app = create_app()
     # Bind to all IPs and use port 5000 by default. Debug mode can be enabled
     # via FLASK_DEBUG environment variable.
-    flask_app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    debug_mode = os.environ.get("FLASK_ENV") != "production"
+    flask_app.run(
+        host="0.0.0.0", 
+        port=int(os.environ.get("PORT", 5000)),
+        debug=debug_mode
+    )

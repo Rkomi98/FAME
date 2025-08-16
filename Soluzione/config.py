@@ -20,9 +20,13 @@ class Config:
 
     # Configure SQLAlchemy to use a SQLite database by default. A different
     # database can be provided by setting the DATABASE_URL environment variable.
+    database_url = os.environ.get("DATABASE_URL")
+    if database_url and database_url.startswith("postgres://"):
+        # Fix for Heroku/Render PostgreSQL URLs
+        database_url = database_url.replace("postgres://", "postgresql://")
+    
     SQLALCHEMY_DATABASE_URI: str = (
-        os.environ.get("DATABASE_URL")
-        or f"sqlite:///{os.path.join(BASE_DIR, 'app.db')}"
+        database_url or f"sqlite:///{os.path.join(BASE_DIR, 'app.db')}"
     )
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
 
